@@ -203,6 +203,20 @@ def test_pythonic_path_param(aiohttp_api_spec_dir, aiohttp_client):
 
 
 @asyncio.coroutine
+def test_cookie_param(aiohttp_api_spec_dir, aiohttp_client):
+    app = AioHttpApp(__name__, port=5001,
+                     specification_dir=aiohttp_api_spec_dir,
+                     debug=True)
+    app.add_api('openapi_simple.yaml', pass_context_arg_name="request")
+
+    app_client = yield from aiohttp_client(app.app)
+    response = yield from app_client.get('/v1.0/test-cookie-param', headers={"Cookie": "test_cookie=hello"})
+    assert response.status == 200
+    j = yield from response.json()
+    assert j['cookie_value'] == "hello"
+
+
+@asyncio.coroutine
 def test_swagger_ui_static(aiohttp_api_spec_dir, aiohttp_client):
     app = AioHttpApp(__name__, port=5001,
                      specification_dir=aiohttp_api_spec_dir,
